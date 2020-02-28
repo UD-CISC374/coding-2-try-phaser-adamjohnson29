@@ -1,5 +1,5 @@
 import ExampleObject from '../objects/exampleObject';
-
+import {Beam} from '../objects/beam';
 export default class MainScene extends Phaser.Scene {
   private exampleObject: ExampleObject;
   //background: Phaser.GameObjects.tileSprite;
@@ -11,6 +11,8 @@ export default class MainScene extends Phaser.Scene {
   player: Phaser.Physics.Arcade.Sprite;
   cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   spacebar: Phaser.Input.Keyboard.Key;
+  projectile: Phaser.GameObjects.Group;
+  beam: Phaser.GameObjects.Sprite;
   
   constructor() {
     super({ key: 'MainScene' });
@@ -25,8 +27,6 @@ export default class MainScene extends Phaser.Scene {
     this.ship2 = this.add.sprite(this.scale.width/2, this.scale.height/2, "ship2");
     this.ship3 = this.add.sprite(this.scale.width/2+50, this.scale.height/2, "ship3");
     
-
-
     this.powerUps = this.physics.add.group();
 
     var maxObjects = 4;
@@ -67,8 +67,8 @@ export default class MainScene extends Phaser.Scene {
     this.player.play("thrust");
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.player.setCollideWorldBounds(true);
-
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.projectile = this.add.group();
   }
 
   update() {
@@ -77,12 +77,17 @@ export default class MainScene extends Phaser.Scene {
     this.moveShip(this.ship3, 3);
 
     this.background.tilePositionY -= 0.5;
-
+    this.background.tilePositionX -= 0.5;
     this.movePlayerManager();
 
     if(Phaser.Input.Keyboard.JustDown(this.spacebar)){
       this.shootBeam();
     }
+    
+    // for(var i = 0; i < this.projectiles.getChildren().length; i++) {
+    //   var beam = this.projectiles.getChildren()[i];
+    //   beam.update();
+    // }
   }
 
   movePlayerManager() {
@@ -119,7 +124,6 @@ export default class MainScene extends Phaser.Scene {
   }
 
   shootBeam() {
-    var beam = new Beam(this);
+    let beam = new Beam(this);
   }
-  
 }
