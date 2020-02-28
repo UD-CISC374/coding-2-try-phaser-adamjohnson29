@@ -10,6 +10,7 @@ export default class MainScene extends Phaser.Scene {
   powerUps: Phaser.Physics.Arcade.Group;
   player: Phaser.Physics.Arcade.Sprite;
   cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
+  spacebar: Phaser.Input.Keyboard.Key;
   
   constructor() {
     super({ key: 'MainScene' });
@@ -66,6 +67,8 @@ export default class MainScene extends Phaser.Scene {
     this.player.play("thrust");
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.player.setCollideWorldBounds(true);
+
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
   }
 
   update() {
@@ -76,6 +79,10 @@ export default class MainScene extends Phaser.Scene {
     this.background.tilePositionY -= 0.5;
 
     this.movePlayerManager();
+
+    if(Phaser.Input.Keyboard.JustDown(this.spacebar)){
+      this.shootBeam();
+    }
   }
 
   movePlayerManager() {
@@ -111,5 +118,8 @@ export default class MainScene extends Phaser.Scene {
     gameObject.play("explosion_anim");
   }
 
+  shootBeam() {
+    var beam = new Beam(this);
+  }
   
 }
