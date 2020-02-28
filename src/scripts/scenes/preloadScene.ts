@@ -4,32 +4,32 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("spacegif", "assets/images/spacegif.gif");
-    this.load.spritesheet("ship", "assets/spritesheets/ship.png", {
+    this.load.image("spacegif", "./assets/images/spacegif.gif");
+    this.load.spritesheet("ship", "./assets/spritesheets/ship.png", {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.spritesheet("ship2", "assets/spritesheets/ship2.png", {
+    this.load.spritesheet("ship2", "./assets/spritesheets/ship2.png", {
       frameWidth: 32,
       frameHeight: 16
     });
-    this.load.spritesheet("ship3", "assets/spritesheets/ship3.png", {
+    this.load.spritesheet("ship3", "./assets/spritesheets/ship3.png", {
       frameWidth: 32,
       frameHeight: 32
     });
-    this.load.spritesheet("explosion", "assets/spritesheets/explosion.png", {
+    this.load.spritesheet("explosion", "./assets/spritesheets/explosion.png", {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.spritesheet("power-up", "assets/spritesheets/power-up.png", {
+    this.load.spritesheet("power-up", "./assets/spritesheets/power-up.png", {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.spritesheet("player", "assets/spritesheets/player.png", {
+    this.load.spritesheet("player", "./assets/spritesheets/player.png", {
       frameWidth: 16,
       frameHeight: 24
     });
-    this.load.spritesheet("beam", "assets/spritesheets/beam.png", {
+    this.load.spritesheet("beam", "./assets/spritesheets/beam.png", {
       frameWidth:16,
       frameHeight:16
     });
