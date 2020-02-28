@@ -7,47 +7,43 @@ export default class MainScene extends Phaser.Scene {
   ship2: Phaser.GameObjects.Sprite;
   ship3: Phaser.GameObjects.Sprite;
   background: Phaser.GameObjects.TileSprite;
-
+  powerUps: Phaser.Physics.Arcade.Group;
+  player: Phaser.Physics.Arcade.Sprite;
+  cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
+  
   constructor() {
     super({ key: 'MainScene' });
   }
 
+  
   create() {
-    this.background = this.add.tileSprite(0,0, this.scale.width, this.scale.height,"background");
+    this.background = this.add.tileSprite(0,0, this.game.scale.width, this.game.scale.height,"background");
     this.background.setOrigin(0,0);
 
     this.ship1 = this.add.sprite(this.scale.width/2 -50, this.scale.height/2, "ship");
     this.ship2 = this.add.sprite(this.scale.width/2, this.scale.height/2, "ship2");
     this.ship3 = this.add.sprite(this.scale.width/2+50, this.scale.height/2, "ship3");
     
-    this.anims.create({
-      key: "ship1_anim",
-      frames: this.anims.generateFrameNumbers("ship", {start: 0, end: 1}),
-      frameRate: 20,
-      repeat: -1
-    });
 
-    this.anims.create({
-      key: "ship2_anim",
-      frames: this.anims.generateFrameNumbers("ship2", {start: 0, end: 1}),
-      frameRate: 20,
-      repeat: -1
-    });
 
-    this.anims.create({
-      key: "ship3_anim",
-      frames: this.anims.generateFrameNumbers("ship3", {start: 0, end: 1}),
-      frameRate: 20,
-      repeat: -1
-    });
+    this.powerUps = this.physics.add.group();
 
-    this.anims.create({
-      key: "explosion_anim",
-      frames: this.anims.generateFrameNumbers("explosion", {start: 0, end: 4}),
-      frameRate: 20,
-      repeat: 0,
-      hideOnComplete: true
-    });
+    var maxObjects = 4;
+    for (var i = 0; i <= maxObjects; i++) {
+      var powerUp = this.physics.add.sprite(16,16,"power-up");
+      this.powerUps.add(powerUp);
+      powerUp.setRandomPosition(0,0, this.game.scale.width, this.game.scale.height);
+      
+      if (Math.random() > 0.5) {
+        powerUp.play("red");
+      } else {
+        powerUp.play("grey");
+      }
+
+      powerUp.setVelocity(100,100);
+      powerUp.setCollideWorldBounds(true);
+      powerUp.setBounce(1);
+    }
 
     this.ship1.play("ship1_anim");
     this.ship2.play("ship2_anim");
@@ -66,6 +62,10 @@ export default class MainScene extends Phaser.Scene {
       fill: "yellow"
     });
   
+    this.player = this.physics.add.sprite(this.scale.width/2 - 8, this.scale.height - 64, "player");
+    this.player.play("thrust");
+    this.cursorKeys = this.input.keyboard.createCursorKeys();
+    this.player.setCollideWorldBounds(true);
   }
 
   update() {
@@ -74,8 +74,25 @@ export default class MainScene extends Phaser.Scene {
     this.moveShip(this.ship3, 3);
 
     this.background.tilePositionY -= 0.5;
+
+    this.movePlayerManager();
   }
 
+  movePlayerManager() {
+    if(this.cursorKeys.left?.isDown){
+      this.player.setVelocityX(-200);
+    } 
+    else if(this.cursorKeys.right?.isDown){
+      this.player.setVelocityX(200);
+    }
+
+    if(this.cursorKeys.up?.isDown){
+      this.player.setVelocityY(-200);
+    }
+    else if(this.cursorKeys.down?.isDown){
+      this.player.setVelocityY(200);
+    }
+  }
   moveShip(ship,speed) {
     ship.y += speed;
     if (ship.y > this.scale.height) {
@@ -93,4 +110,6 @@ export default class MainScene extends Phaser.Scene {
     gameObject.setTexture("explosion");
     gameObject.play("explosion_anim");
   }
+
+  
 }
