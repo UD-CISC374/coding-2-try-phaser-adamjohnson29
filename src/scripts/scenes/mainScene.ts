@@ -84,10 +84,10 @@ export default class MainScene extends Phaser.Scene {
       this.shootBeam();
     }
     
-    // for(var i = 0; i < this.projectiles.getChildren().length; i++) {
-    //   var beam = this.projectiles.getChildren()[i];
-    //   beam.update();
-    // }
+    for(var i = 0; i < this.projectile.getChildren().length; i++) {
+      var beam = this.projectile.getChildren()[i];
+      beam.update();
+    }
   }
 
   movePlayerManager() {
