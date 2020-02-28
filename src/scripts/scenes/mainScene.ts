@@ -13,6 +13,7 @@ export default class MainScene extends Phaser.Scene {
   spacebar: Phaser.Input.Keyboard.Key;
   projectile: Phaser.GameObjects.Group;
   beam: Phaser.GameObjects.Sprite;
+  enemies: Phaser.Physics.Arcade.Group;
   
   constructor() {
     super({ key: 'MainScene' });
@@ -50,6 +51,11 @@ export default class MainScene extends Phaser.Scene {
     this.ship2.play("ship2_anim");
     this.ship3.play("ship3_anim");
 
+    this.enemies = this.physics.add.group();
+    this.enemies.add(this.ship1);
+    this.enemies.add(this.ship2);
+    this.enemies.add(this.ship3);
+
     this.ship1.setInteractive();
     this.ship2.setInteractive();
     this.ship3.setInteractive();
@@ -69,6 +75,17 @@ export default class MainScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.projectile = this.add.group();
+
+    //adding collisions
+    this.physics.add.overlap(this.projectile, this.enemies, this.hitEnemy, function(){}, this);
+    this.physics.add.overlap(this.player, this.enemies, this.hurtPlayer, function(){}, this);
+    this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, function(){}, this);
+    this.physics.add.collider(this.projectile, this.powerUps, function(projectile, powerUp) {
+      projectile.destroy();
+      powerUp.destroy();
+    });
+
+    
   }
 
   update() {
@@ -125,5 +142,20 @@ export default class MainScene extends Phaser.Scene {
 
   shootBeam() {
     let beam = new Beam(this);
+  }
+
+  pickPowerUp(player, powerUp) {
+    powerUp.disableBody(true,true);
+  }
+
+  hurtPlayer(player, enemy) {
+    this.resetShipPos(enemy);
+    player.x = this.scale.width/2 - 8;
+    player.y = this.scale.height - 64;
+  }
+
+  hitEnemy(projectile, enemy){
+    projectile.destroy();
+    this.resetShipPos(enemy);
   }
 }
