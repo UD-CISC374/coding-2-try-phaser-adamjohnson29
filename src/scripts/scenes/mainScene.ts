@@ -1,12 +1,12 @@
-import ExampleObject from '../objects/exampleObject';
+//mport ExampleObject from '../objects/exampleObject';
 import {Beam} from '../objects/beam';
+import { Explosion } from '../objects/explosion';
 export default class MainScene extends Phaser.Scene {
-  private exampleObject: ExampleObject;
-  //background: Phaser.GameObjects.tileSprite;
+  //private exampleObject: ExampleObject;
+  background: Phaser.GameObjects.TileSprite;
   ship1: Phaser.GameObjects.Sprite;
   ship2: Phaser.GameObjects.Sprite;
   ship3: Phaser.GameObjects.Sprite;
-  background: Phaser.GameObjects.TileSprite;
   powerUps: Phaser.Physics.Arcade.Group;
   player: Phaser.Physics.Arcade.Sprite;
   cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -14,6 +14,10 @@ export default class MainScene extends Phaser.Scene {
   projectile: Phaser.GameObjects.Group;
   beam: Phaser.GameObjects.Sprite;
   enemies: Phaser.Physics.Arcade.Group;
+  scoreLabel: Phaser.GameObjects.Text;
+  scoreCount: number;
+  scoreCountLabel: Phaser.GameObjects.Text;
+  playerSpeed = 200;
   
   constructor() {
     super({ key: 'MainScene' });
@@ -21,8 +25,22 @@ export default class MainScene extends Phaser.Scene {
 
   
   create() {
-    this.background = this.add.tileSprite(0,0, this.game.scale.width, this.game.scale.height,"background");
+    this.background = this.add.tileSprite(0,0, this.game.scale.width, this.game.scale.height,"spacegif");
     this.background.setOrigin(0,0);
+
+    var graphics = this.add.graphics();
+    graphics.fillStyle(0x000000, 1);
+    graphics.beginPath();
+    graphics.moveTo(0,0);
+    graphics.lineTo(this.scale.width, 0);
+    graphics.lineTo(this.scale.width, 20);
+    graphics.lineTo(0,20);
+    graphics.lineTo(0,0);
+    graphics.closePath();
+    graphics.fillPath();
+    this.scoreLabel = this.add.text(0,0, "Score: ");
+    this.scoreCount = 0;
+    this.scoreCountLabel = this.add.text(60,0, this.scoreCount.toString());
 
     this.ship1 = this.add.sprite(this.scale.width/2 -50, this.scale.height/2, "ship");
     this.ship2 = this.add.sprite(this.scale.width/2, this.scale.height/2, "ship2");
@@ -47,28 +65,24 @@ export default class MainScene extends Phaser.Scene {
       powerUp.setBounce(1);
     }
 
+    //added ships
     this.ship1.play("ship1_anim");
     this.ship2.play("ship2_anim");
     this.ship3.play("ship3_anim");
-
+    //added enemies
     this.enemies = this.physics.add.group();
     this.enemies.add(this.ship1);
     this.enemies.add(this.ship2);
     this.enemies.add(this.ship3);
-
+    //ships are interactive
     this.ship1.setInteractive();
     this.ship2.setInteractive();
     this.ship3.setInteractive();
 
     this.input.on('gameobjectdown', this.destroyShip, this);
 
-    this.exampleObject = new ExampleObject(this, 0, 0);
+    //this.exampleObject = new ExampleObject(this, 0, 0);
     
-    this.add.text(20,20, "Playing game", { 
-      font: "25px Arial", 
-      fill: "yellow"
-    });
-  
     this.player = this.physics.add.sprite(this.scale.width/2 - 8, this.scale.height - 64, "player");
     this.player.play("thrust");
     this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -84,8 +98,6 @@ export default class MainScene extends Phaser.Scene {
       projectile.destroy();
       powerUp.destroy();
     });
-
-    
   }
 
   update() {
@@ -98,7 +110,9 @@ export default class MainScene extends Phaser.Scene {
     this.movePlayerManager();
 
     if(Phaser.Input.Keyboard.JustDown(this.spacebar)){
-      this.shootBeam();
+      if(this.player.active) {
+        this.shootBeam();
+      }
     }
     
     for(var i = 0; i < this.projectile.getChildren().length; i++) {
@@ -106,20 +120,19 @@ export default class MainScene extends Phaser.Scene {
       beam.update();
     }
   }
-
   movePlayerManager() {
     if(this.cursorKeys.left?.isDown){
-      this.player.setVelocityX(-200);
+      this.player.setVelocityX(-this.playerSpeed);
     } 
     else if(this.cursorKeys.right?.isDown){
-      this.player.setVelocityX(200);
+      this.player.setVelocityX(this.playerSpeed);
     }
 
     if(this.cursorKeys.up?.isDown){
-      this.player.setVelocityY(-200);
+      this.player.setVelocityY(-this.playerSpeed);
     }
     else if(this.cursorKeys.down?.isDown){
-      this.player.setVelocityY(200);
+      this.player.setVelocityY(this.playerSpeed);
     }
   }
   moveShip(ship,speed) {
@@ -128,34 +141,48 @@ export default class MainScene extends Phaser.Scene {
       this.resetShipPos(ship);
     } 
   }
-
   resetShipPos(ship) {
     ship.y = 0;
     var randomX = Phaser.Math.Between(0, this.scale.width);
     ship.x = randomX;
   }
-
   destroyShip(pointer, gameObject) {
     gameObject.setTexture("explosion");
     gameObject.play("explosion_anim");
   }
-
   shootBeam() {
     let beam = new Beam(this);
   }
-
   pickPowerUp(player, powerUp) {
     powerUp.disableBody(true,true);
+    this.playerSpeed += 20;
   }
-
   hurtPlayer(player, enemy) {
+    this.scoreCount -= 15;
+    this.scoreCountLabel.setText(this.scoreCount.toString());
     this.resetShipPos(enemy);
-    player.x = this.scale.width/2 - 8;
-    player.y = this.scale.height - 64;
+    this.playerSpeed = 200;
+    var explosion = new Explosion(this, player.x, player.y);
+    player.disableBody(true,true);
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.resetPlayer,
+      callbackScope: this,
+      loop: false
+    });
   }
-
   hitEnemy(projectile, enemy){
+    
+    var explosion = new Explosion(this, enemy.x, enemy.y);
+    
     projectile.destroy();
     this.resetShipPos(enemy);
+    this.scoreCount += 15;
+    this.scoreCountLabel.setText(this.scoreCount.toString());
+  }
+  resetPlayer(){
+    var x = this.scale.width /2 -8;
+    var y = this.scale.height + 64;
+    this.player.enableBody(true, x, y, true, true);
   }
 }
