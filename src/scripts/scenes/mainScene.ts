@@ -17,7 +17,11 @@ export default class MainScene extends Phaser.Scene {
   scoreLabel: Phaser.GameObjects.Text;
   scoreCount: number;
   scoreCountLabel: Phaser.GameObjects.Text;
+  playerSize = 1;
   playerSpeed = 200;
+  lifeLabel: Phaser.GameObjects.Text;
+  lifeCount: number;
+  lifeCountLabel: Phaser.GameObjects.Text;
   
   constructor() {
     super({ key: 'MainScene' });
@@ -39,8 +43,11 @@ export default class MainScene extends Phaser.Scene {
     graphics.closePath();
     graphics.fillPath();
     this.scoreLabel = this.add.text(0,0, "Score: ");
+    this.lifeLabel = this.add.text(100,0, "Lives: ");
     this.scoreCount = 0;
+    this.lifeCount = 3;
     this.scoreCountLabel = this.add.text(60,0, this.scoreCount.toString());
+    this.lifeCountLabel = this.add.text(160,0,this.lifeCount.toString());
 
     this.ship1 = this.add.sprite(this.scale.width/2 -50, this.scale.height/2, "ship");
     this.ship2 = this.add.sprite(this.scale.width/2, this.scale.height/2, "ship2");
@@ -156,6 +163,9 @@ export default class MainScene extends Phaser.Scene {
   pickPowerUp(player, powerUp) {
     powerUp.disableBody(true,true);
     this.playerSpeed += 20;
+    this.player.scaleX += .5;
+    this.player.scaleY += .5;
+
   }
   hurtPlayer(player, enemy) {
     this.scoreCount -= 15;
@@ -184,5 +194,12 @@ export default class MainScene extends Phaser.Scene {
     var x = this.scale.width /2 -8;
     var y = this.scale.height + 64;
     this.player.enableBody(true, x, y, true, true);
+    this.player.scaleX = 1;
+    this.player.scaleY = 1;
+    this.lifeCount -= 1;
+    this.lifeCountLabel.setText(this.lifeCount.toString());
+    if(this.lifeCount == 0){
+      this.scene.stop('MainScene');
+    }
   }
 }
